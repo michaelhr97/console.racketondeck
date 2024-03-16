@@ -1,8 +1,10 @@
-import { Box, Container, TextField, Typography, Button } from '@mui/material';
-import { Form, Formik } from 'formik';
-import React from 'react';
+import React, { useState } from 'react';
 import * as Yup from 'yup';
+import { Form, Formik } from 'formik';
+import { Box, Container, TextField, Typography, Button, Alert } from '@mui/material';
+
 import authService from '../../services/authService';
+import { setAuthorizationToken } from '../../lib/axios';
 
 const validationSchema = Yup.object().shape({
   email: Yup.string().email('Invalid email').required('Email is required'),
@@ -11,9 +13,15 @@ const validationSchema = Yup.object().shape({
 
 function Login() {
   const initialValues = { email: '', password: '' };
+  const [error, setError] = useState('');
 
   const handleFormSubmit = async (values) => {
-    const response = await authService.login(values);
+    try {
+      const response = await authService.login(values);
+      setAuthorizationToken(response.data);
+    } catch (error) {
+      setError(error.message);
+    }
   };
 
   return (
@@ -63,6 +71,11 @@ function Login() {
                 helperText={touched.password && errors.password}
                 sx={{ mb: 2 }}
               />
+              {error && (
+                <Alert severity='error' sx={{ mb: 2 }}>
+                  {error}
+                </Alert>
+              )}
               <Button type='submit' variant='contained' color='primary' fullWidth>
                 Login
               </Button>

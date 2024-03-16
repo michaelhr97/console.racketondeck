@@ -9,8 +9,15 @@ client.interceptors.response.use(
     return response.data;
   },
   function (error) {
+    if (error?.response) {
+      return Promise.reject(error.response.data);
+    }
     return Promise.reject(error);
   }
 );
+
+export const setAuthorizationToken = (token) => {
+  client.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+};
 
 export default client;
